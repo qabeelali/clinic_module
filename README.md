@@ -25,8 +25,8 @@ To get started with this module, follow these steps:
 2. Open the project in Xcode.
 3. Make sure you have the Flutter SDK installed. If not, refer to the official Flutter documentation for installation instructions.
 4. Open a terminal and navigate to the project's root directory.
-5. Run 'flutter build ios' to build the Flutter module for iOS.
-6. Return to Xcode and build and run the project on an iOS simulator or device.
+5. Run 'flutter build ios-framework' to build the Flutter module for iOS.
+6. Do getting started steps in https://github.com/qabeelali/clinic_example repo.
 
 ## Usage
 
