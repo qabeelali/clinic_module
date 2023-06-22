@@ -2,12 +2,15 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 
+import '../model/date.dart';
+import '../model/price.dart';
+import '../model/request.dart';
+import '../model/sheet.dart';
+import '../model/user_to_send.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:toast/toast.dart';
-import '../model/sheet.dart';
-import '../model/user_to_send.dart';
 import '../utils/constant.dart';
 import '../utils/props.dart';
 
@@ -25,6 +28,17 @@ class PatientController extends ChangeNotifier {
   String? drugsNextUrl;
   List<File>? dxImages;
   List<Sheet?> recievedSheet = [];
+  List<RequestContainer>? requests;
+  int? selectedFilter;
+  final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
+  DateTime? filterTime;
+  Request? request;
+  List <AvailedDate>? dates;
+  int? selectedDate;
+  List <Price> prices = [];
+  int selectedPrice =0;
+  String? bookingTime;
+  bool requestLoading = false;
   Future<void> getSheets({String? url, String? search}) async {
     if (search == null) {
       sheets = null;
@@ -162,6 +176,16 @@ class PatientController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void createDx() {
+    sheetToSend!.dx = Dx(content: '', file_url: []);
+    notifyListeners();
+  }
+
+  void removeDx() {
+    sheetToSend!.dx = null;
+    notifyListeners();
+  }
+
   void addDrug(String count) async {
     sheetToSend!.addDrug(Rx(
         id: selectedDrug!.id,
@@ -179,7 +203,7 @@ class PatientController extends ChangeNotifier {
   }
 
   void createSheetToSend(
-      String patientName, int gender, String weight, Dx dx, String age,
+      String patientName, int gender, String weight, Dx? dx, String age,
       {List<Rx>? rx,
       int? sheetId,
       List<Radiology>? radiology,
@@ -277,16 +301,23 @@ class PatientController extends ChangeNotifier {
     sheetToSend = null;
   }
 
-  Future<dynamic> storeNewSheet() async {
+  Future<dynamic> storeNewSheet({bool? isNewOeder}) async {
     var url = Uri.parse(storeSheet);
     var headers = {
       'Content-Type': 'application/json',
       "Authorization": "Bearer ${token}",
       'ali': 'de'
     };
-    var body = jsonEncode(sheetToSend!.toJson());
+    Map body = {...sheetToSend!.toJson()};
+    if (isNewOeder != null) {
+      body['order_id'] = request!.id;
+      body['isFamily']= request!.isFamily; 
+      body['user_id']= request!.userId;
+    }
+    print(body);
+    var jsonBody = jsonEncode(body);
 
-    http.Response response = await http.post(url, headers: headers, body: body);
+    http.Response response = await http.post(url, headers: headers, body: jsonBody);
 
     if (response.statusCode == 200) {
       var json = jsonDecode(response.body);
@@ -431,6 +462,7 @@ class PatientController extends ChangeNotifier {
     sheetToSend!.addLab(Lab(
       id: selectedDrug!.id,
       isAccepted: 0,
+      content: [],
       labtest_name: selectedDrug!.name,
       labtest_id: selectedDrug!.id.toString(),
     ));
@@ -629,4 +661,181 @@ class PatientController extends ChangeNotifier {
     sheetToSend!.removeImage(index);
     notifyListeners();
   }
+
+  Future<void> getRequests() async {
+     requestLoading = true;
+    notifyListeners();
+    http.Response _res =
+        await http.get(Uri.parse(getRequestsUrl('1', filterTime==null?null: '${filterTime!.year}-${filterTime!.month}-${filterTime!.day}', selectedFilter)), headers: {
+      'Authorization': 'Bearer ${token}',
+      "Accept": "application/json",
+      'Accept-Language': 'en'
+    });
+    if (_res.statusCode == 200) {
+      print(_res.body);
+      var json = jsonDecode(_res.body);
+      if (json['status']) {
+           requests = [];
+        for (var element in json['data']) {
+          requests!.add(RequestContainer.fromJson(element));
+        }
+      
+      }
+    }
+      await Future.delayed(Duration(milliseconds: 100));
+        requestLoading = false;
+        notifyListeners();
+  }
+  void changeFilter(int index){
+    if (index==selectedFilter) {
+      selectedFilter = null;
+    }
+    else{
+      
+    selectedFilter = index;
+    }
+    notifyListeners();
+  }
+  void changeFilterDate(DateTime date){
+    filterTime = date;
+    notifyListeners();
+  }
+  void clearFilterDate(){
+    filterTime = null;  
+    notifyListeners();
+  }
+Future<void> getRequest(String id)async{
+  request = null;
+    notifyListeners();
+
+    http.Response _res =
+        await http.get(Uri.parse(getRequestUrl(id)), headers: {
+      'Authorization': 'Bearer ${token}',
+      "Accept": "application/json",
+      'Accept-Language': 'en'
+    });
+    if (_res.statusCode == 200) {
+      var json = jsonDecode(_res.body);
+      if (json['status']) {
+        request = Request.fromJson(json['data']);
+      }
+    }
+    notifyListeners();
 }
+
+Future<void> getDates(String id) async {
+    http.Response _res =
+        await http.get(Uri.parse(getDatesUrl(id)), headers: {
+      'Authorization': 'Bearer ${token}',
+      "Accept": "application/json",
+      'Accept-Language': 'en'
+    });
+    if (_res.statusCode == 200) {
+      print(_res.body);
+      var json = jsonDecode(_res.body);
+      if (json['status']) {
+        dates = [];
+        for (var element in json['data']) {
+          dates!.add(AvailedDate.fromJson(element));
+        }
+        notifyListeners();
+      }
+    }
+  }
+
+  void selectDate(int id){
+    selectedDate = id;
+    notifyListeners();
+  }
+  Future<void> getPrices() async {
+    http.Response _res =
+        await http.get(Uri.parse(getPricesUrl), headers: {
+      'Authorization': 'Bearer ${token}',
+      "Accept": "application/json",
+      'Accept-Language': 'en'
+    });
+    if (_res.statusCode == 200) {
+      print(_res.body);
+      var json = jsonDecode(_res.body);
+      if (json['status']) {
+        prices = [];
+        for (var element in json['data']) {
+          prices.add(Price.fromJson(element));
+        }
+        notifyListeners();
+      }
+    }
+  }
+  void selectPrice(int index){
+    selectedPrice = index;
+    notifyListeners();
+  }
+  void changeBokingTime (String time){
+    bookingTime = time;
+    notifyListeners();
+  }
+
+  Future<bool> acceptRequest()async{
+    
+      http.Response _res =
+        await http.post(Uri.parse(acceptRequestUrl), headers: {
+      'Authorization': 'Bearer ${token}',
+      "Accept": "application/json",
+      'Accept-Language': 'en'
+    }, body: {
+      'id': request!.id.toString(),
+    if(bookingTime!=null)  'time':bookingTime,
+      if(selectedDate!=null) 'series_num':selectedDate.toString(),
+     'product_id':prices[selectedPrice].productId
+    });
+    if (_res.statusCode == 200) {
+      var json = jsonDecode(_res.body);
+      print(json);
+      if (json['status']) {
+        request!.state = json['data']['state_num'];
+        request!.stateName = json['data']['state_name'];
+        notifyListeners();
+        return true;
+}else{
+  Toast.show(json['message'], backgroundColor: Colors.red, duration: 5);
+  return false;
+}
+    }else{
+      Toast.show('Error has been occurred', backgroundColor: Colors.red, duration: 5);
+  return false;
+    }
+  
+  }
+   Future<bool> rejectRequest(String reason)async{
+    
+      http.Response _res =
+        await http.post(Uri.parse(rejectRequestUrl), headers: {
+      'Authorization': 'Bearer ${token}',
+      "Accept": "application/json",
+      'Accept-Language': 'en'
+    }, body: {
+      'id': request!.id.toString(),
+  'reason':reason
+    });
+    if (_res.statusCode == 200) {
+      var json = jsonDecode(_res.body);
+      if (json['status']) {
+        request!.state = 8;
+        request!.stateName = 'Rejected';
+        notifyListeners();
+        return true;
+}else{
+  Toast.show(json['message'], backgroundColor: Colors.red, duration: 5);
+  return false;
+}
+    }else{
+      Toast.show('Error has been occurred', backgroundColor: Colors.red, duration: 5);
+  return false;
+    }
+  
+  }
+
+
+  
+}
+

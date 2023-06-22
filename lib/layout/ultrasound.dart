@@ -1,25 +1,24 @@
 import 'dart:io';
 
 import 'package:carousel_slider/carousel_slider.dart';
-
+import '../controller/provider.dart';
+import '../helper/launch_screen.dart';
+import '../layout/add_patient.dart';
+import '../utils/props.dart';
+import '../view/image_screen.dart';
+import '../widget/pharmacy_appbar.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
-import 'package:flutter_nps/layout/add_patient.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:toast/toast.dart';
 
 import '../controller/pahrmacy_controller.dart';
-import '../controller/provider.dart';
-import '../helper/launch_screen.dart';
 import '../model/pharmacy_model.dart';
 import '../model/sheet.dart';
-import '../utils/props.dart';
-import '../view/image_screen.dart';
-import '../widget/pharmacy_appbar.dart';
 
 class UltrasoundPage extends StatefulWidget {
   const UltrasoundPage({super.key});
@@ -41,6 +40,7 @@ class _RadiologyPageState extends State<UltrasoundPage> {
   @override
   Widget build(BuildContext context) {
     Recieved? recieved = Provider.of<PharmacyController>(context).received;
+    int phase = Provider.of<provider>(context).phase;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -51,7 +51,71 @@ class _RadiologyPageState extends State<UltrasoundPage> {
                 PharmacyAppBar(),
                 Expanded(
                     child: ListView(
-                  children: recieved.is_seen!
+                  children: recieved.is_seen==null?[
+                          if (phase == 0)
+                            ...recieved.ultrasound!.mapIndexed((index, e) {
+                              if (e.isAccepted == 0) {
+                                return RadiologySelectWidget(
+                                  state: 0,
+                                  e: e,
+                                  selected: Provider.of<PharmacyController>(
+                                          context,
+                                          listen: false)
+                                      .selected
+                                      .where((element) => element['id'] == e.id)
+                                      .isNotEmpty,
+                                );
+                              }
+                              return RadiologySelectWidget(
+                                state: 2,
+                                selected: false,
+                                index: index,
+                                seen: true,
+                                e: e,
+                                image: e.file_url[0]['file'],
+                                description: e.received_note,
+                              );
+                            }),
+                            if(phase == 1)                                      ...Provider.of<PharmacyController>(
+                                              context)
+                                          .selected
+                                          .mapIndexed((index, e) =>
+                                              RadiologySelectWidget(
+                                                state: 1,
+                                                e: e,
+                                                selected: false,
+                                                index: index,
+                                                image: e['files'] != null
+                                                    ? e['files']
+                                                    : null,
+                                                description: e['received_note'],
+                                              )),
+
+                                              if(phase ==2) ...Provider.of<PharmacyController>(
+                                              context,
+                                              listen: false)
+                                          .selected
+                                          .mapIndexed((index, element) {
+                                        return RadiologySelectWidget(
+                                          state: 2,
+                                          selected:
+                                              Provider.of<PharmacyController>(
+                                                      context,
+                                                      listen: false)
+                                                  .accepted
+                                                  .where((e) =>
+                                                      element['id'] == e!['id'])
+                                                  .isNotEmpty,
+                                          index: index,
+                                          e: element,
+                                          image: element['files'] != null
+                                              ? element['files'][0]
+                                              : null,
+                                          description: element['received_note'],
+                                        );
+                                      })
+
+                        ]: recieved.is_seen!
                       ? [
                           ...recieved.ultrasound!.mapIndexed((index, element) {
                             String file = element.file_url[0]['file'];
@@ -124,7 +188,7 @@ class _RadiologyPageState extends State<UltrasoundPage> {
                 ))
               ],
             ),
-      bottomNavigationBar: recieved == null || recieved.is_seen!
+      bottomNavigationBar: recieved ==null?Container(height: 1,): recieved!.is_seen!=null&&( recieved == null || recieved.is_seen==true)
           ? Container(
               height: 1,
             )
@@ -213,8 +277,9 @@ class _RadiologyPageState extends State<UltrasoundPage> {
                               .changePhase(1);
                           break;
                         case 1:
-                          Provider.of<provider>(context, listen: false)
-                              .changePhase(2);
+                                             if(Provider.of<PharmacyController>(context, listen: false).vlidate()){
+Provider.of<provider>(context, listen: false)
+                              .changePhase(2);}
                           break;
                         case 2:
                           setState(() {
@@ -528,7 +593,7 @@ class _RadiologySelectWidgetState extends State<RadiologySelectWidget> {
     }
   }
 
-  Future BottomSheet(BuildContext context,
+   Future BottomSheet(BuildContext context,
       {required int index, String? text, required List images}) async {
     return showModalBottomSheet<void>(
       constraints:
@@ -726,6 +791,7 @@ class _RadiologyBottomSheetState extends State<RadiologyBottomSheet> {
                 color: 0xff0199EC,
                 text: 'Check',
                 onTap: () {
+                  
                   if (widget.images.isNotEmpty && _controller.text.isNotEmpty) {
                     Provider.of<PharmacyController>(context, listen: false)
                         .addImageToAccepted(widget.images, widget.index);

@@ -1,18 +1,20 @@
 import 'dart:io';
 
 import 'package:carousel_slider/carousel_slider.dart';
+import '../controller/provider.dart';
+import '../controller/ptient_controller.dart';
+import '../helper/launch_screen.dart';
+import '../layout/add_patient.dart';
+import '../widget/pharmacy_appbar.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_nps/layout/add_patient.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:toast/toast.dart';
 
 import '../controller/pahrmacy_controller.dart';
-import '../controller/provider.dart';
-import '../helper/launch_screen.dart';
 import '../model/pharmacy_model.dart';
-import '../widget/pharmacy_appbar.dart';
 
 class LabPage extends StatefulWidget {
   const LabPage({super.key});
@@ -34,7 +36,7 @@ class _RadiologyPageState extends State<LabPage> {
   @override
   Widget build(BuildContext context) {
     Recieved? recieved = Provider.of<PharmacyController>(context).received;
-
+    // print(recieved!.lab![1].isAccepted);
     var phase2 = Provider.of<provider>(context).phase;
     return Scaffold(
       backgroundColor: Colors.white,
@@ -45,98 +47,15 @@ class _RadiologyPageState extends State<LabPage> {
                 PharmacyAppBar(),
                 Expanded(
                     child: ListView(
-                  children: recieved.is_seen!
+                  ///
+                  ///To Do: replace this true with request.seen==null
+                  ///
+                  children: recieved.is_seen==null
                       ? [
-                          ...recieved.lab!.mapIndexed((index, element) {
-                            if (element != null) {
-                              return Container(
-                                  child: Material(
-                                color: Colors.white,
-                                child: Column(children: [
-                                  ExpansionTile(
-                                    title: Text(element.labtest_name),
-                                    children: [
-                                      ...element.content!.map((e) {
-                                        return Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Row(
-                                            children: [
-                                              Expanded(
-                                                  child: Material(
-                                                      color: Colors.white,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              9),
-                                                      elevation: 3,
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(12.0),
-                                                        child: Center(
-                                                          child: Text(
-                                                            e['name'],
-                                                            style: TextStyle(
-                                                                fontSize: 20),
-                                                          ),
-                                                        ),
-                                                      ))),
-                                              Container(width: 5),
-                                              Expanded(
-                                                  child: Material(
-                                                      color: Colors.white,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              9),
-                                                      elevation: 3,
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(12.0),
-                                                        child: Center(
-                                                          child: Text(
-                                                            e['result'],
-                                                            style: TextStyle(
-                                                                fontSize: 20),
-                                                          ),
-                                                        ),
-                                                      ))),
-                                              Container(width: 5),
-                                              Expanded(
-                                                  child: Material(
-                                                      color: Colors.white,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              9),
-                                                      elevation: 3,
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(12.0),
-                                                        child: Center(
-                                                          child: Text(
-                                                            e['nv'],
-                                                            style: TextStyle(
-                                                                fontSize: 20),
-                                                          ),
-                                                        ),
-                                                      ))),
-                                            ],
-                                          ),
-                                        );
-                                      })
-                                    ],
-                                  )
-                                ]),
-                              ));
-                            }
-                            return Container();
-                          })
-                        ]
-                      : phase2 == 0
-                          ? [
-                              ...recieved.lab!.map((e) => RadiologySelectWidget(
-                                    state: 0,
-                                    e: e,
+                          if (phase2 == 0)
+                            ...recieved.lab.mapIndexed((index, e) {
+                              if (e.isAccepted == 0) {
+                                return RadiologySelectWidget(
                                     selected: Provider.of<PharmacyController>(
                                             context,
                                             listen: false)
@@ -144,14 +63,350 @@ class _RadiologyPageState extends State<LabPage> {
                                         .where(
                                             (element) => element['id'] == e.id)
                                         .isNotEmpty,
-                                  ))
+                                    state: 0,
+                                    e: e);
+                              } else {
+                                if (e.isAccepted ==1 && phase2 == 0) {
+                                  return Container(
+                                      child: Material(
+                                    color: Colors.white,
+                                    child: Column(children: [
+                                      ExpansionTile(
+                                        title: Text(e.labtest_name),
+                                        children: [
+                                          ...e.content!.map((e) {
+                                            return Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Row(
+                                                children: [
+                                                  Expanded(
+                                                      child: Material(
+                                                          color: Colors.white,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(9),
+                                                          elevation: 3,
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(12.0),
+                                                            child: Center(
+                                                              child: Text(
+                                                                e['name'],
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        20),
+                                                              ),
+                                                            ),
+                                                          ))),
+                                                  Container(width: 5),
+                                                  Expanded(
+                                                      child: Material(
+                                                          color: Colors.white,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(9),
+                                                          elevation: 3,
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(12.0),
+                                                            child: Center(
+                                                              child: Text(
+                                                                e['result'],
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        20),
+                                                              ),
+                                                            ),
+                                                          ))),
+                                                  Container(width: 5),
+                                                  Expanded(
+                                                      child: Material(
+                                                          color: Colors.white,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(9),
+                                                          elevation: 3,
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(12.0),
+                                                            child: Center(
+                                                              child: Text(
+                                                                e['nv'],
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        20),
+                                                              ),
+                                                            ),
+                                                          ))),
+                                                ],
+                                              ),
+                                            );
+                                          })
+                                        ],
+                                      )
+                                    ]),
+                                  ));
+                                }
+                                return Container();
+                              }
+                            }),
+                          if (phase2 == 1)
+                            ...Provider.of<PharmacyController>(context)
+                                .selected
+                                .mapIndexed((index, e) => RadiologySelectWidget(
+                                      state: 1,
+                                      e: e,
+                                      selected: false,
+                                      index: index,
+                                      image: e['files'] != null
+                                          ? e['files'][0]
+                                          : null,
+                                      description: e['received_note'],
+                                    )),
+                       if(phase2==2)     ...Provider.of<PharmacyController>(
+                                              context,
+                                              listen: false)
+                                          .selected
+                                          .mapIndexed((index, element) {
+                                        if (element['content'] != null) {
+                                          return Container(
+                                              child: Material(
+                                            color: Colors.white,
+                                            child: Column(children: [
+                                              ExpansionTile(
+                                                title: Text(element['name']),
+                                                children: [
+                                                  ...element['content']
+                                                      .map((e) {
+                                                    return Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              8.0),
+                                                      child: Row(
+                                                        children: [
+                                                          Expanded(
+                                                              child: Material(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              9),
+                                                                  elevation: 3,
+                                                                  child:
+                                                                      Padding(
+                                                                    padding: const EdgeInsets
+                                                                            .all(
+                                                                        12.0),
+                                                                    child:
+                                                                        Center(
+                                                                      child:
+                                                                          Text(
+                                                                        e['name'],
+                                                                        style: TextStyle(
+                                                                            fontSize:
+                                                                                20),
+                                                                      ),
+                                                                    ),
+                                                                  ))),
+                                                          Container(width: 5),
+                                                          Expanded(
+                                                              child: Material(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              9),
+                                                                  elevation: 3,
+                                                                  child:
+                                                                      Padding(
+                                                                    padding: const EdgeInsets
+                                                                            .all(
+                                                                        12.0),
+                                                                    child:
+                                                                        Center(
+                                                                      child:
+                                                                          Text(
+                                                                        e['result'],
+                                                                        style: TextStyle(
+                                                                            fontSize:
+                                                                                20),
+                                                                      ),
+                                                                    ),
+                                                                  ))),
+                                                          Container(width: 5),
+                                                          Expanded(
+                                                              child: Material(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              9),
+                                                                  elevation: 3,
+                                                                  child:
+                                                                      Padding(
+                                                                    padding: const EdgeInsets
+                                                                            .all(
+                                                                        12.0),
+                                                                    child:
+                                                                        Center(
+                                                                      child:
+                                                                          Text(
+                                                                        e['nv'],
+                                                                        style: TextStyle(
+                                                                            fontSize:
+                                                                                20),
+                                                                      ),
+                                                                    ),
+                                                                  ))),
+                                                        ],
+                                                      ),
+                                                    );
+                                                  })
+                                                ],
+                                              )
+                                            ]),
+                                          ));
+                                        }
+                                        return RadiologySelectWidget(
+                                          state: 2,
+                                          selected:
+                                              Provider.of<PharmacyController>(
+                                                      context,
+                                                      listen: false)
+                                                  .accepted
+                                                  .where((e) =>
+                                                      element['id'] == e!['id'])
+                                                  .isNotEmpty,
+                                          index: index,
+                                          e: element,
+                                          image: element['files'] != null
+                                              ? element['files'][0]
+                                              : null,
+                                          description: element['received_note'],
+                                        );
+                                      })
+                        ]
+                      : recieved.is_seen!
+                          ? [
+                              ...recieved.lab!.mapIndexed((index, element) {
+                                if (element != null) {
+                                  return Container(
+                                      child: Material(
+                                    color: Colors.white,
+                                    child: Column(children: [
+                                      ExpansionTile(
+                                        title: Text(element.labtest_name),
+                                        children: [
+                                          ...element.content!.map((e) {
+                                            return Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Row(
+                                                children: [
+                                                  Expanded(
+                                                      child: Material(
+                                                          color: Colors.white,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(9),
+                                                          elevation: 3,
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(12.0),
+                                                            child: Center(
+                                                              child: Text(
+                                                                e['name'],
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        20),
+                                                              ),
+                                                            ),
+                                                          ))),
+                                                  Container(width: 5),
+                                                  Expanded(
+                                                      child: Material(
+                                                          color: Colors.white,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(9),
+                                                          elevation: 3,
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(12.0),
+                                                            child: Center(
+                                                              child: Text(
+                                                                e['result'],
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        20),
+                                                              ),
+                                                            ),
+                                                          ))),
+                                                  Container(width: 5),
+                                                  Expanded(
+                                                      child: Material(
+                                                          color: Colors.white,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(9),
+                                                          elevation: 3,
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(12.0),
+                                                            child: Center(
+                                                              child: Text(
+                                                                e['nv'],
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        20),
+                                                              ),
+                                                            ),
+                                                          ))),
+                                                ],
+                                              ),
+                                            );
+                                          })
+                                        ],
+                                      )
+                                    ]),
+                                  ));
+                                }
+                                return Container();
+                              })
                             ]
-                          : phase2 == 1
+                          : phase2 == 0
                               ? [
-                                  ...Provider.of<PharmacyController>(context)
-                                      .selected
-                                      .mapIndexed(
-                                          (index, e) => RadiologySelectWidget(
+                                  ...recieved.lab!
+                                      .map((e) => RadiologySelectWidget(
+                                            state: 0,
+                                            e: e,
+                                            selected:
+                                                Provider.of<PharmacyController>(
+                                                        context,
+                                                        listen: false)
+                                                    .selected
+                                                    .where((element) =>
+                                                        element['id'] == e.id)
+                                                    .isNotEmpty,
+                                          ))
+                                ]
+                              : phase2 == 1
+                                  ? [
+                                      ...Provider.of<PharmacyController>(
+                                              context)
+                                          .selected
+                                          .mapIndexed((index, e) =>
+                                              RadiologySelectWidget(
                                                 state: 1,
                                                 e: e,
                                                 selected: false,
@@ -161,132 +416,146 @@ class _RadiologyPageState extends State<LabPage> {
                                                     : null,
                                                 description: e['received_note'],
                                               ))
-                                ]
-                              : [
-                                  ...Provider.of<PharmacyController>(context,
-                                          listen: false)
-                                      .selected
-                                      .mapIndexed((index, element) {
-                                    if (element['content'] != null) {
-                                      return Container(
-                                          child: Material(
-                                        color: Colors.white,
-                                        child: Column(children: [
-                                          ExpansionTile(
-                                            title: Text(element['name']),
-                                            children: [
-                                              ...element['content'].map((e) {
-                                                return Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(8.0),
-                                                  child: Row(
-                                                    children: [
-                                                      Expanded(
-                                                          child: Material(
-                                                              color:
-                                                                  Colors.white,
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          9),
-                                                              elevation: 3,
-                                                              child: Padding(
-                                                                padding:
-                                                                    const EdgeInsets
-                                                                            .all(
-                                                                        12.0),
-                                                                child: Center(
-                                                                  child: Text(
-                                                                    e['name'],
-                                                                    style: TextStyle(
-                                                                        fontSize:
-                                                                            20),
-                                                                  ),
-                                                                ),
-                                                              ))),
-                                                      Container(width: 5),
-                                                      Expanded(
-                                                          child: Material(
-                                                              color:
-                                                                  Colors.white,
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          9),
-                                                              elevation: 3,
-                                                              child: Padding(
-                                                                padding:
-                                                                    const EdgeInsets
-                                                                            .all(
-                                                                        12.0),
-                                                                child: Center(
-                                                                  child: Text(
-                                                                    e['result'],
-                                                                    style: TextStyle(
-                                                                        fontSize:
-                                                                            20),
-                                                                  ),
-                                                                ),
-                                                              ))),
-                                                      Container(width: 5),
-                                                      Expanded(
-                                                          child: Material(
-                                                              color:
-                                                                  Colors.white,
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          9),
-                                                              elevation: 3,
-                                                              child: Padding(
-                                                                padding:
-                                                                    const EdgeInsets
-                                                                            .all(
-                                                                        12.0),
-                                                                child: Center(
-                                                                  child: Text(
-                                                                    e['nv'],
-                                                                    style: TextStyle(
-                                                                        fontSize:
-                                                                            20),
-                                                                  ),
-                                                                ),
-                                                              ))),
-                                                    ],
-                                                  ),
-                                                );
-                                              })
-                                            ],
-                                          )
-                                        ]),
-                                      ));
-                                    }
-                                    return RadiologySelectWidget(
-                                      state: 2,
-                                      selected: Provider.of<PharmacyController>(
+                                    ]
+                                  : [
+                                      ...Provider.of<PharmacyController>(
                                               context,
                                               listen: false)
-                                          .accepted
-                                          .where(
-                                              (e) => element['id'] == e!['id'])
-                                          .isNotEmpty,
-                                      index: index,
-                                      e: element,
-                                      image: element['files'] != null
-                                          ? element['files'][0]
-                                          : null,
-                                      description: element['received_note'],
-                                    );
-                                  })
-                                ],
+                                          .selected
+                                          .mapIndexed((index, element) {
+                                        if (element['content'] != null) {
+                                          return Container(
+                                              child: Material(
+                                            color: Colors.white,
+                                            child: Column(children: [
+                                              ExpansionTile(
+                                                title: Text(element['name']),
+                                                children: [
+                                                  ...element['content']
+                                                      .map((e) {
+                                                    return Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              8.0),
+                                                      child: Row(
+                                                        children: [
+                                                          Expanded(
+                                                              child: Material(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              9),
+                                                                  elevation: 3,
+                                                                  child:
+                                                                      Padding(
+                                                                    padding: const EdgeInsets
+                                                                            .all(
+                                                                        12.0),
+                                                                    child:
+                                                                        Center(
+                                                                      child:
+                                                                          Text(
+                                                                        e['name'],
+                                                                        style: TextStyle(
+                                                                            fontSize:
+                                                                                20),
+                                                                      ),
+                                                                    ),
+                                                                  ))),
+                                                          Container(width: 5),
+                                                          Expanded(
+                                                              child: Material(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              9),
+                                                                  elevation: 3,
+                                                                  child:
+                                                                      Padding(
+                                                                    padding: const EdgeInsets
+                                                                            .all(
+                                                                        12.0),
+                                                                    child:
+                                                                        Center(
+                                                                      child:
+                                                                          Text(
+                                                                        e['result'],
+                                                                        style: TextStyle(
+                                                                            fontSize:
+                                                                                20),
+                                                                      ),
+                                                                    ),
+                                                                  ))),
+                                                          Container(width: 5),
+                                                          Expanded(
+                                                              child: Material(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              9),
+                                                                  elevation: 3,
+                                                                  child:
+                                                                      Padding(
+                                                                    padding: const EdgeInsets
+                                                                            .all(
+                                                                        12.0),
+                                                                    child:
+                                                                        Center(
+                                                                      child:
+                                                                          Text(
+                                                                        e['nv'],
+                                                                        style: TextStyle(
+                                                                            fontSize:
+                                                                                20),
+                                                                      ),
+                                                                    ),
+                                                                  ))),
+                                                        ],
+                                                      ),
+                                                    );
+                                                  })
+                                                ],
+                                              )
+                                            ]),
+                                          ));
+                                        }
+                                        return RadiologySelectWidget(
+                                          state: 2,
+                                          selected:
+                                              Provider.of<PharmacyController>(
+                                                      context,
+                                                      listen: false)
+                                                  .accepted
+                                                  .where((e) =>
+                                                      element['id'] == e!['id'])
+                                                  .isNotEmpty,
+                                          index: index,
+                                          e: element,
+                                          image: element['files'] != null
+                                              ? element['files'][0]
+                                              : null,
+                                          description: element['received_note'],
+                                        );
+                                      })
+                                    ],
                 ))
               ],
             ),
-      bottomNavigationBar: recieved == null || recieved.is_seen!
-          ? Container(
-              height: 1,
-            )
-          : Padding(
+
+      ///
+      ///To Do: remove this false with request.seen==null
+      ///
+      bottomNavigationBar: recieved!=null?  (  recieved!.is_seen==null) ||
+              (recieved != null 
+                  && recieved.is_seen== false
+                  )
+          ? Padding(
               padding: const EdgeInsets.fromLTRB(12.0, 0, 12.0, 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -363,8 +632,15 @@ class _RadiologyPageState extends State<LabPage> {
                               .changePhase(1);
                           break;
                         case 1:
-                          Provider.of<provider>(context, listen: false)
-                              .changePhase(2);
+                          if (Provider.of<PharmacyController>(context,
+                                  listen: false)
+                              .labValidate()) {
+                            Provider.of<provider>(context, listen: false)
+                                .changePhase(2);
+                          } else {
+                            Toast.show('msg');
+                          }
+
                           break;
                         case 2:
                           Provider.of<PharmacyController>(context,
@@ -381,7 +657,10 @@ class _RadiologyPageState extends State<LabPage> {
                   )
                 ],
               ),
-            ),
+            ): Container(
+              height: 1,
+            ): Container(height: 1,)
+          
     );
   }
 }

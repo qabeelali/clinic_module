@@ -1,7 +1,7 @@
+import '../widget/patient_data_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
-import 'package:flutter_nps/widget/patient_data_widget.dart';
 import 'package:provider/provider.dart';
 
 import '../controller/pahrmacy_controller.dart';
@@ -14,7 +14,8 @@ class PharmacyAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     Recieved? recieved = Provider.of<PharmacyController>(context).received;
 
-    return Flexible(
+    return Container(
+      height: MediaQuery.of(context).size.height*0.53,
       child: Stack(
         children: [
           Positioned(
@@ -65,7 +66,7 @@ class PharmacyAppBar extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  height: MediaQuery.of(context).size.height * 0.08,
+                  height: MediaQuery.of(context).size.height * 0.1,
                 ),
                 PatientDataWidget(
                     patientName: '${recieved!.user_info.patient_name}',

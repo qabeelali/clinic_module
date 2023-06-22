@@ -1,14 +1,14 @@
+import '../service/login.dart';
 import 'package:flutter/material.dart';
 
 import '../model/user.dart';
-import '../service/login.dart';
 
 class userController extends ChangeNotifier {
   SharedService _service = SharedService();
   User? user;
   bool isLogin = false;
 
-  Future<void> getUserFromShared() async {
+  Future<void>getUserFromShared()async {
     await _service.initialize();
     user = _service.getUser();
     isLogin = user != null;

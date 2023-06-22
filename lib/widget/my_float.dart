@@ -1,12 +1,11 @@
 import 'dart:ffi';
 import 'dart:ui';
 
+import '../controller/ptient_controller.dart';
+import '../layout/add_patient.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
-
-import '../controller/ptient_controller.dart';
-import '../layout/add_patient.dart';
 
 class MyFloat extends StatefulWidget {
   final bool editable;
@@ -212,7 +211,29 @@ class _MyFloatState extends State<MyFloat> with SingleTickerProviderStateMixin {
                                             name: 'Dx',
                                             image: 'dx',
                                             onPressed: () {
-                                              print('2');
+                                              if (widget.editable) {
+                                              Provider.of<PatientController>(context, listen: false).createDx();
+                                                
+                                              }else{
+                                                  Navigator.of(context).push(
+                                                      MaterialPageRoute(
+                                                          builder: (context) {
+                                                    return PatientAdd(
+                                                        method: 'dx',
+                                                        user: Provider.of<
+                                                                    PatientController>(
+                                                                context,
+                                                                listen: false)
+                                                            .sheet!
+                                                            .patientInfo,
+                                                        sheetId: Provider.of<
+                                                                    PatientController>(
+                                                                context,
+                                                                listen: false)
+                                                            .sheet!
+                                                            .sheetId);
+                                                  }));
+                                              }
                                             },
                                           ),
                                         ],

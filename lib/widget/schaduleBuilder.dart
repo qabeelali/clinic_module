@@ -1,6 +1,6 @@
-// import 'package:clinic/helper/launch_screen.dart';
-// import 'package:clinic/service/book.dart';
-// import 'package:clinic/widget/schadule_widget.dart';
+// import '../helper/launch_screen.dart';
+// import '../service/book.dart';
+// import '../widget/schadule_widget.dart';
 // import 'package:flutter/material.dart';
 // import 'package:provider/provider.dart';
 // import 'package:collection/collection.dart';

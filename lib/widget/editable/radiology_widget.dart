@@ -1,12 +1,11 @@
+import '../controller/ptient_controller.dart';
+import '../widget/editable/rx_widget.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
-import 'package:flutter_nps/widget/editable/rx_widget.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
-
-import '../../controller/ptient_controller.dart';
 
 class RadiologyWidget extends StatefulWidget {
   const RadiologyWidget({super.key, required this.type});

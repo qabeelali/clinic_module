@@ -1,5 +1,15 @@
 import 'dart:io';
 
+import '../controller/ptient_controller.dart';
+import '../helper/launch_screen.dart';
+import '../helper/my_appbar.dart';
+import '../model/sheet.dart';
+import '../widget/doctor_data_widget.dart';
+import '../widget/my_float.dart';
+import '../widget/patient_data_widget.dart';
+import '../widget/uneditable/dx_widget.dart';
+import '../widget/uneditable/radiology_widget.dart';
+import '../widget/uneditable/rx_widget.dart';
 import 'package:flutter/services.dart';
 
 import 'package:path_provider/path_provider.dart';
@@ -13,18 +23,8 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import '../controller/ptient_controller.dart';
-import '../helper/launch_screen.dart';
-import '../helper/my_appbar.dart';
 import '../helper/pdf_view.dart';
-import '../model/sheet.dart';
 import '../model/user_to_send.dart';
-import '../widget/doctor_data_widget.dart';
-import '../widget/my_float.dart';
-import '../widget/patient_data_widget.dart';
-import '../widget/uneditable/dx_widget.dart';
-import '../widget/uneditable/radiology_widget.dart';
-import '../widget/uneditable/rx_widget.dart';
 
 class PatientScreen extends StatefulWidget {
   @override
@@ -317,9 +317,9 @@ class _PatientScreenState extends State<PatientScreen> {
                   Container(
                     height: 10,
                   ),
-                  DxU(
-                    data: data.dx.content,
-                    image: data.dx.file_url,
+                 if(data.dx != null) DxU(
+                    data: data.dx!.content,
+                    image: data.dx!.file_url,
                   ),
                   data.rx.length == 0
                       ? Container()

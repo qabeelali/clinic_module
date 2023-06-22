@@ -49,7 +49,7 @@ class Doctor {
     required this.id,
     required this.image,
     required this.full_name,
-    required this.name,
+     this.name,
     this.bio,
     this.country_name,
     this.city_name,
@@ -64,7 +64,7 @@ class Doctor {
   int id;
   String image;
   String full_name;
-  String name;
+  String? name;
   String? bio;
   String? country_name;
   String? city_name;
@@ -100,7 +100,7 @@ class Update {
   final int id;
   final String date;
   final int sheetId;
-  final Dx dx;
+  final Dx? dx;
   final List<Rx?> rx;
   final List<Radiology?> radiology;
   final List<Ultrasound?> ultrasound;
@@ -116,7 +116,7 @@ class Update {
       required this.update_list,
       required this.id,
       required this.date,
-      required this.dx,
+       this.dx,
       required this.rx,
       required this.radiology,
       required this.ultrasound,
@@ -131,7 +131,7 @@ class Update {
         update_list: json['update_list'],
         id: json['id'],
         date: json['date'],
-        dx: Dx.fromJson(json['dx']),
+        dx: json['dx'] != null? Dx.fromJson(json['dx']): null,
         rx: [...json['rx'].map((e) => Rx.fromJson(e))],
         radiology: [...json['radiology'].map((e) => Radiology.fromJson(e))],
         ultrasound: [...json['ultrasound'].map((e) => Ultrasound.fromJson(e))],
@@ -207,6 +207,7 @@ class Rx {
       isAccepted: json['isAccepted'],
       drug_name: json['drug_name'],
       description: json['received_note'],
+
     );
   }
   Map<String, dynamic> toJson() => {
@@ -215,7 +216,7 @@ class Rx {
         // 'isAccepted': isAccepted,
         // 'user_id': user_id,
         // 'drug_name': drug_name,
-        // 'description': description,
+        'description_note': description,
       };
 }
 
@@ -305,10 +306,10 @@ class Lab {
   final int isAccepted;
   final String labtest_name;
   final String? labtest_id;
-  final List? content;
+  final List content;
   Lab({
     required this.id,
-    this.content,
+    required this.content,
     required this.isAccepted,
     required this.labtest_name,
     this.labtest_id,
@@ -318,7 +319,7 @@ class Lab {
     return Lab(
       id: json['id'],
       isAccepted: json['isAccepted'],
-      content: json['content'],
+      content: json['content']??[],
       labtest_name: json['labtest_name'],
       labtest_id: json['labtest_id'],
     );
@@ -341,24 +342,26 @@ class Other {
       this.received_note,
       required this.isAccepted,
       this.type,
-      this.file_url});
+     required this.file_url});
 
   final int id;
   final String name;
   final String description_note;
   final String? received_note;
   final int isAccepted;
-  final List? file_url;
+  final List file_url;
   final String? type;
+  
 
   factory Other.fromJson(Map<String, dynamic> json) {
     return Other(
       id: json['id'],
       name: json['name'],
-      description_note: json['description_note'],
+      description_note: json['description_note']??'',
       isAccepted: json['isAccepted'],
       file_url: json['file_url'],
       type: json['type'],
+      received_note: json['received_note']
     );
   }
   Map<String, dynamic> toJson() {
@@ -397,7 +400,7 @@ class SheetToSend {
       {required this.patientName,
       required this.gender,
       required this.weight,
-      required this.dx,
+       this.dx,
       required this.age,
       this.ultrasound,
       this.radiology,
@@ -411,7 +414,7 @@ class SheetToSend {
   int? sheetId;
   int gender;
   String weight;
-  Dx dx;
+  Dx? dx;
   List<Rx>? rx;
   List<Radiology>? radiology;
   List<Lab>? lab;
@@ -424,7 +427,7 @@ class SheetToSend {
   }
 
   void setDxContent(String content) {
-    dx.content = content;
+    dx!.content = content;
   }
 
   void clearDrugs() {
@@ -464,10 +467,10 @@ class SheetToSend {
 
   void editDxFiles(String method, {File? file}) {
     if (method == 'clear') {
-      dx.file_url.clear();
+      dx!.file_url.clear();
     } else {
       if (file != null) {
-        dx.file_url.add(file);
+        dx!.file_url.add(file);
       } else {
         throw 'no file added';
       }
@@ -483,11 +486,11 @@ class SheetToSend {
   }
 
   void addImage(File file) {
-    dx.file_url.add(base64Encode(file.readAsBytesSync()));
+    dx!.file_url.add(base64Encode(file.readAsBytesSync()));
   }
 
   void removeImage(int index) {
-    dx.file_url.removeAt(index);
+    dx!.file_url.removeAt(index);
   }
 
   void createRadiologyContainer() {
@@ -543,7 +546,7 @@ class SheetToSend {
         'gender': gender,
         'weight': weight,
         'lab': lab != null ? lab!.map((e) => e.toJson()).toList() : [],
-        'dx': dx.toJson(),
+        'dx': dx!=null? dx!.toJson():null,
         'rx': rx != null ? rx!.map((r) => r.toJson()).toList() : null,
         'radiology': radiology != null
             ? radiology!.map((r) => r!.toJson()).toList()

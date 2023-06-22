@@ -1,10 +1,9 @@
+import '../../controller/ptient_controller.dart';
+import '../../model/sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:provider/provider.dart';
-
-import '../../controller/ptient_controller.dart';
-import '../../model/sheet.dart';
 
 class PatientInfoEditable extends StatefulWidget {
   PatientInfoEditable({super.key, this.userInfo});
@@ -22,7 +21,7 @@ class _PatientInfoEditableState extends State<PatientInfoEditable> {
         Provider.of<PatientController>(context, listen: false).sheetToSend!;
     return Container(
       width: MediaQuery.of(context).size.width * 0.98,
-      height: MediaQuery.of(context).size.height * 0.23,
+      height: MediaQuery.of(context).size.height * 0.25,
       child: Material(
         elevation: 3,
         borderRadius: BorderRadius.circular(35),

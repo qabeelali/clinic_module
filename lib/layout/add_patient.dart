@@ -1,14 +1,16 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:provider/provider.dart';
-
+import '../controller/provider.dart';
 import '../controller/ptient_controller.dart';
-import '../helper/my_appbar.dart';
+import '../layout/patient.dart';
 import '../model/sheet.dart';
 import '../widget/editable/dx_widget.dart';
 import '../widget/editable/patient_info.dart';
 import '../widget/editable/radiology_widget.dart';
 import '../widget/editable/rx_widget.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+
+import '../helper/my_appbar.dart';
 import '../widget/my_float.dart';
 
 class PatientAdd extends StatefulWidget {
@@ -32,18 +34,21 @@ class _PatientAddState extends State<PatientAdd> {
         '',
         0,
         '',
-        Dx(content: '', file_url: []),
+        null,
         '',
       );
     } else {
       switch (widget.method) {
+        case 'dx':
+        Provider.of<PatientController>(context, listen: false).createDx();
+        break;
         case 'rx':
           Provider.of<PatientController>(context, listen: false)
               .createSheetToSend(
                   widget.user!.patient_name,
                   widget.user!.gender == 'male' ? 0 : 1,
                   widget.user!.weight ?? '',
-                  Dx(content: '', file_url: []),
+                  null,
                   widget.user!.age,
                   rx: [],
                   sheetId: widget.sheetId);
@@ -55,7 +60,7 @@ class _PatientAddState extends State<PatientAdd> {
                   widget.user!.patient_name,
                   widget.user!.gender == 'male' ? 0 : 1,
                   widget.user!.weight ?? '',
-                  Dx(content: '', file_url: []),
+                  null,
                   widget.user!.age,
                   sheetId: widget.sheetId,
                   radiology: []);
@@ -66,7 +71,7 @@ class _PatientAddState extends State<PatientAdd> {
                   widget.user!.patient_name,
                   widget.user!.gender == 'male' ? 0 : 1,
                   widget.user!.weight ?? '',
-                  Dx(content: '', file_url: []),
+                  null,
                   widget.user!.age,
                   sheetId: widget.sheetId,
                   lab: []);
@@ -77,7 +82,7 @@ class _PatientAddState extends State<PatientAdd> {
                   widget.user!.patient_name,
                   widget.user!.gender == 'male' ? 0 : 1,
                   widget.user!.weight ?? '',
-                  Dx(content: '', file_url: []),
+                  null,
                   widget.user!.age,
                   sheetId: widget.sheetId,
                   ultrasound: []);
@@ -88,10 +93,12 @@ class _PatientAddState extends State<PatientAdd> {
                   widget.user!.patient_name,
                   widget.user!.gender == 'male' ? 0 : 1,
                   widget.user!.weight ?? '',
-                  Dx(content: '', file_url: []),
+                  null,
                   widget.user!.age,
                   sheetId: widget.sheetId,
                   other: []);
+          break;
+          case 'newOrder':
           break;
         default:
           Provider.of<PatientController>(context, listen: false)
@@ -99,7 +106,7 @@ class _PatientAddState extends State<PatientAdd> {
                   widget.user!.patient_name,
                   widget.user!.gender == 'male' ? 0 : 1,
                   widget.user!.weight ?? '',
-                  Dx(content: '', file_url: []),
+                  null,
                   widget.user!.age);
       }
     }
@@ -129,7 +136,7 @@ class _PatientAddState extends State<PatientAdd> {
             Container(
               height: 10,
             ),
-            DxWidget(),
+          sheet.dx!=null?  DxWidget():Container(),
             sheet.rx == null ? Container() : RxWidget(),
             sheet.radiology != null
                 ? RadiologyWidget(
@@ -218,15 +225,17 @@ class _PatientAddState extends State<PatientAdd> {
                   setState(() {
                     isLoading = true;
                   });
-                  if (widget.method == null) {
-                    Provider.of<PatientController>(context, listen: false)
-                        .storeNewSheet()
+                  if (widget.method == null|| widget.method == 'newOrder') {
+                    if (widget.method == 'newOrder') {
+                       Provider.of<PatientController>(context, listen: false)
+                        .storeNewSheet(isNewOeder: true)
                         .then((value) {
                       Provider.of<PatientController>(context, listen: false)
                           .getShowSheet(value['update_id'].toString())
                           .then((value) {
-                        Navigator.pushNamedAndRemoveUntil(
-                            context, '/patient', ModalRoute.withName('/'));
+                             Navigator.pushReplacement(context,
+                           MaterialPageRoute(builder:(context) => PatientScreen(),));
+                 
                       });
                     }).then((value) {
                       setState(() {
@@ -237,6 +246,25 @@ class _PatientAddState extends State<PatientAdd> {
                         isLoading = false;
                       });
                     });
+                    }else{
+                    Provider.of<PatientController>(context, listen: false)
+                        .storeNewSheet()
+                        .then((value) {
+                      Provider.of<PatientController>(context, listen: false)
+                          .getShowSheet(value['update_id'].toString())
+                          .then((value) {
+                              Navigator.pushNamedAndRemoveUntil(
+                            context, '/patient', ModalRoute.withName('/'));
+                      });
+                    }).then((value) {
+                      setState(() {
+                        isLoading = false;
+                      });
+                    }).catchError((e) {
+                      setState(() {
+                        isLoading = false;
+                      });
+                    });}
                   } else {
                     await Provider.of<PatientController>(context, listen: false)
                         .sendNewUpadte()

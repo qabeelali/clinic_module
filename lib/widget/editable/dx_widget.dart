@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import '../../helper/base64_to_file.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -8,7 +9,6 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '../../controller/ptient_controller.dart';
 import '../../helper//image_picker.dart';
-import '../../helper/base64_to_file.dart';
 
 class DxWidget extends StatefulWidget {
   const DxWidget({super.key});
@@ -48,9 +48,22 @@ class _DxWidgetState extends State<DxWidget> {
                       'Dx',
                       style: TextStyle(fontFamily: 'neo', fontSize: 26),
                     ),
-                    Padding(
-                        padding: const EdgeInsets.only(right: 12.0),
-                        child: Container())
+                   Padding(
+                          padding: const EdgeInsets.only(right: 12.0),
+                          child: Row(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  Provider.of<PatientController>(context,
+                                          listen: false)
+                                      .removeDx();
+                                },
+                                child:
+                                    SvgPicture.asset('assets/images/undo.svg'),
+                              ),
+                            ],
+                          ),
+                        ),
                   ],
                 ),
                 Container(
@@ -97,7 +110,7 @@ class _DxWidgetState extends State<DxWidget> {
                     )),
                 ...Provider.of<PatientController>(context)
                     .sheetToSend!
-                    .dx
+                    .dx!
                     .file_url
                     .mapIndexed((index, e) => GestureDetector(
                           onTap: () {

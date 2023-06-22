@@ -1,11 +1,10 @@
+import '../controller/provider.dart';
+import '../controller/ptient_controller.dart';
+import '../model/sheet.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
-
-import '../controller/provider.dart';
-import '../controller/ptient_controller.dart';
-import '../model/sheet.dart';
 
 class PatientTabChild extends StatelessWidget {
   const PatientTabChild({

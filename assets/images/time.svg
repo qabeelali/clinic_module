@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+  <g id="Time_Circle" data-name="Time Circle" transform="translate(0 0)">
+    <path id="Time_Circle-2" data-name="Time Circle" d="M0,10A10,10,0,1,1,10,20,10.011,10.011,0,0,1,0,10Zm1.5,0A8.5,8.5,0,1,0,10,1.5,8.51,8.51,0,0,0,1.5,10Zm11.638,3.633-.091-.047-3.77-2.249a.751.751,0,0,1-.357-.532l-.008-.112V5.846a.75.75,0,0,1,1.493-.1l.006.1v4.42l3.4,2.032a.75.75,0,0,1,.306.937l-.046.091a.75.75,0,0,1-.938.307Z" transform="translate(0 0.001)" fill="#626262"/>
+  </g>
+</svg>

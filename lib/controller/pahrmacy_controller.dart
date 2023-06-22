@@ -2,13 +2,14 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import '../model/sheet.dart';
+import '../utils/constant.dart';
+import '../utils/props.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:toast/toast.dart';
 
 import '../model/pharmacy_model.dart';
-import '../utils/constant.dart';
-import '../utils/props.dart';
 
 class PharmacyController extends ChangeNotifier {
   List accepted = [];
@@ -225,5 +226,43 @@ class PharmacyController extends ChangeNotifier {
   removeLabFromAccepted(int index) {
     accepted.removeWhere((element) => element['id'] == selected[index]['id']);
     notifyListeners();
+  }
+
+  bool vlidate() {
+    print(selected);
+    bool validation = false;
+    for (var e in selected) {
+      if (e['received_note'] != null && e['files'] != null) {
+        validation = true;
+      } else {
+        validation = false;
+        break;
+      }
+    }
+
+    return validation;
+  }
+
+  bool labValidate() {
+    print(selected);
+    bool validation = false;
+    for (var element in selected) {
+      bool continuee = true;
+      for (var e in element['content']) {
+        if (e['result'] != null && e['nv'] != null && e['name'] != null) {
+          validation = true;
+        } else {
+          validation = false;
+          continuee = false;
+
+          break;
+        }
+      }
+      if (!continuee) {
+        break;
+      }
+    }
+
+    return validation;
   }
 }

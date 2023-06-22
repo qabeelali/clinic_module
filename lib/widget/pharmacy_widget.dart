@@ -1,12 +1,14 @@
+import '../controller/pahrmacy_controller.dart';
+import '../controller/provider.dart';
+import '../controller/ptient_controller.dart';
+import '../model/pharmacy_model.dart';
+import '../model/sheet.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
 
-import '../controller/pahrmacy_controller.dart';
-import '../controller/provider.dart';
 import '../controller/user_controller.dart';
-import '../model/pharmacy_model.dart';
 
 class PharmacyWidget extends StatelessWidget {
   const PharmacyWidget({
@@ -15,7 +17,7 @@ class PharmacyWidget extends StatelessWidget {
     required this.isSeen,
   });
   final PharmacyItem data;
-  final bool isSeen;
+  final bool? isSeen;
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +70,7 @@ class PharmacyWidget extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: isSeen ? Color(0xff0199EC) : Colors.transparent,
+                        color: isSeen==null ? Colors.amber : isSeen!? Color(0xff0199EC) : Colors.transparent,
                       ),
                       borderRadius: BorderRadius.circular(24),
                     ),

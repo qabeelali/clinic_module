@@ -21,7 +21,7 @@ class _PatientDataWidgetState extends State<PatientDataWidget> {
   Widget build(BuildContext context) {
     return Container(
       constraints: BoxConstraints(
-        minHeight: MediaQuery.of(context).size.height * 0.21,
+        minHeight: MediaQuery.of(context).size.height * 0.18,
       ),
       width: MediaQuery.of(context).size.width,
       decoration: BoxDecoration(
@@ -36,7 +36,7 @@ class _PatientDataWidgetState extends State<PatientDataWidget> {
                 color: Color(0xff000000).withOpacity(0.2)),
           ]),
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -44,7 +44,7 @@ class _PatientDataWidgetState extends State<PatientDataWidget> {
               'Patient Name: ${widget.patientName}',
               style: TextStyle(fontSize: 22, fontFamily: 'neo'),
             ),
-            Container(height:  MediaQuery.of(context).size.height * 0.02,),
+            Container(height:  MediaQuery.of(context).size.height * 0.01,),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -61,7 +61,7 @@ class _PatientDataWidgetState extends State<PatientDataWidget> {
                 )
               ],
             ),
-            Container(height:  MediaQuery.of(context).size.height * 0.02,),
+            Container(height:  MediaQuery.of(context).size.height * 0.01,),
            
               Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -81,7 +81,7 @@ class _PatientDataWidgetState extends State<PatientDataWidget> {
 
               ],
             ),
-            Container(height:  MediaQuery.of(context).size.height * 0.02,),
+            Container(height:  MediaQuery.of(context).size.height * 0.01,),
               Text(
                   'Date: ${widget.date}',
                   style: TextStyle(fontSize: 22, fontFamily: 'neo'),

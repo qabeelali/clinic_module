@@ -1,14 +1,17 @@
+import '../controller/pahrmacy_controller.dart';
+import '../controller/provider.dart';
+import '../helper/launch_screen.dart';
+import '../model/pharmacy_model.dart';
+import '../model/sheet.dart';
+import '../widget/doctor_data_widget.dart';
+import '../widget/patient_data_widget.dart';
+import '../widget/pharmacy_appbar.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:provider/provider.dart';
 
-import '../controller/pahrmacy_controller.dart';
-import '../controller/provider.dart';
-import '../helper/launch_screen.dart';
-import '../model/pharmacy_model.dart';
-import '../widget/pharmacy_appbar.dart';
 import 'add_patient.dart';
 
 class PharmacyPage extends StatefulWidget {
@@ -41,7 +44,46 @@ class _PharmacyPageState extends State<PharmacyPage> {
                 Expanded(
                     child: ListView(
                         shrinkWrap: true,
-                        children: recieved.is_seen!
+                        children: true? [
+                          if(Provider.of<provider>(context).phase==0) ...recieved.rx!.mapIndexed((index, e) {
+                            if(e.isAccepted==0){
+                              return  DrugPharmacyItem(
+                                          selected:
+                                              Provider.of<PharmacyController>(
+                                                      context,
+                                                      listen: false)
+                                                  .selected
+                                                  .where((element) =>
+                                                      element['id'] ==
+                                                      e.orderId)
+                                                  .isNotEmpty,
+                                          rx: e!,
+                                          phase: 0,
+                                        );
+                            }
+                                  return DrugPharmacyItem(
+                                      selected: true,
+                                      rx: e,
+                                      phase: 2,
+                                      seen: true);
+                                  // return Container(
+                                  //   height: 20,
+                                  //   width: 20,
+                                  //   color: Colors.black,
+                                  // );
+                                })
+                       
+                    ,   if(Provider.of<provider>(context).phase == 1) ...Provider.of<PharmacyController>(context,
+                                            listen: false)
+                                        .selected
+                                        .mapIndexed((index, element) {
+                                      return DrugPharmacyItem(
+                                        selected: true,
+                                        rx: element!,
+                                        phase:1,
+                                      );
+                                    })
+                        ]:  recieved.is_seen!
                             ? [
                                 ...recieved.rx!.mapIndexed((index, element) {
                                   return DrugPharmacyItem(
@@ -99,7 +141,7 @@ class _PharmacyPageState extends State<PharmacyPage> {
                                   ])),
               ],
             ),
-      bottomNavigationBar: recieved == null || recieved.is_seen!
+      bottomNavigationBar: recieved == null ? Container(): recieved.is_seen == true
           ? Container(
               height: 1,
             )
@@ -360,7 +402,74 @@ class _DrugPharmacyItemState extends State<DrugPharmacyItem> {
             ],
           ),
         );
-
+      case 2:
+       return Container(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: MediaQuery.of(context).size.width * 0.9,
+                child: Material(
+                  elevation: 3,
+                  borderRadius: BorderRadius.circular(18),
+                  color: Colors.white,
+                  child: Center(
+                      child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      widget.seen == null
+                          ? widget.rx['name']
+                          : widget.rx.drug_name,
+                      style: TextStyle(fontSize: 18, fontFamily: 'neo'),
+                    ),
+                  )),
+                ),
+              ),
+              Container(
+                height: 20,
+              ),
+            widget.rx.description == null
+                                        ? Container()
+                                        :  Container(
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  child: widget.rx.description == null
+                      ? Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                          child: Material(
+                              color: Colors.white,
+                              elevation: 3,
+                              borderRadius: BorderRadius.circular(12),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Center(
+                                    child: Text( widget.rx.description)),
+                              )),
+                        )
+                      : TextField(
+                          onChanged: (e) {
+                            Provider.of<PharmacyController>(context,
+                                    listen: false)
+                                .addDescriptionToAccepted(e, widget.index);
+                          },
+                          maxLines: 4,
+                          decoration: InputDecoration(
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(9),
+                              borderSide: BorderSide(
+                                color: Color(0xff0199EC),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(9),
+                              borderSide: BorderSide(
+                                color: Color(0xff0199EC),
+                              ),
+                            ),
+                          ),
+                        ))
+            ],
+          ),
+        );
       default:
         return Container();
     }

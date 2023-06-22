@@ -2,23 +2,25 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:carousel_slider/carousel_slider.dart';
+import '../controller/provider.dart';
+import '../helper/launch_screen.dart';
+import '../layout/add_patient.dart';
+import '../layout/ultrasound.dart';
+import '../utils/props.dart';
+import '../widget/pharmacy_appbar.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
-import 'package:flutter_nps/layout/ultrasound.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:toast/toast.dart';
 
 import '../controller/pahrmacy_controller.dart';
-import '../controller/provider.dart';
-import '../helper/launch_screen.dart';
 import '../model/pharmacy_model.dart';
 import '../model/sheet.dart';
 import '../view/image_screen.dart';
-import '../widget/pharmacy_appbar.dart';
-import 'add_patient.dart';
 
 class RadiologyPage extends StatefulWidget {
   const RadiologyPage({super.key});
@@ -30,9 +32,19 @@ class RadiologyPage extends StatefulWidget {
 class _RadiologyPageState extends State<RadiologyPage> {
   bool isLoading = false;
   @override
-  Widget build(BuildContext context) {
-    Recieved? recieved = Provider.of<PharmacyController>(context).received;
+  void initState() {
+    // TODO: implement initState
+    super.initState();
 
+    Provider.of<PharmacyController>(context, listen: false).clearAccepted();
+
+    Provider.of<provider>(context, listen: false).changePhase(0);
+  }
+  @override
+  Widget build(BuildContext context) {
+    int phase = Provider.of<provider>(context).phase;
+    Recieved? recieved = Provider.of<PharmacyController>(context).received;
+  
     return Scaffold(
       backgroundColor: Colors.white,
       body: recieved == null
@@ -42,42 +54,113 @@ class _RadiologyPageState extends State<RadiologyPage> {
                 PharmacyAppBar(),
                 Expanded(
                     child: ListView(
-                  children: recieved.is_seen!
+                  ///
+                  ///To Do Change this true with request.isSeen==null
+                  ///
+                  children: recieved.is_seen==null
                       ? [
-                          ...recieved.readiology!.mapIndexed((index, element) {
-                            return RadiologySelectWidget(
-                              state: 2,
-                              selected: false,
-                              index: index,
-                              seen: true,
-                              e: element,
-                              image: element.file_url[0]['file'],
-                              description: element.received_note,
-                            );
-                          })
-                        ]
-                      : Provider.of<provider>(context).phase == 0
-                          ? [
-                              ...recieved!.readiology!
-                                  .map((e) => RadiologySelectWidget(
-                                        state: 0,
-                                        e: e,
-                                        selected:
-                                            Provider.of<PharmacyController>(
-                                                    context,
-                                                    listen: false)
-                                                .selected
-                                                .where((element) =>
-                                                    element['id'] == e.id)
-                                                .isNotEmpty,
-                                      ))
-                            ]
-                          : Provider.of<provider>(context).phase == 1
-                              ? [
-                                  ...Provider.of<PharmacyController>(context)
+                          if (phase == 0)
+                            ...recieved.readiology!.mapIndexed((index, e) {
+                              if (e.isAccepted == 0) {
+                                return RadiologySelectWidget(
+                                  state: 0,
+                                  e: e,
+                                  selected: Provider.of<PharmacyController>(
+                                          context,
+                                          listen: false)
                                       .selected
-                                      .mapIndexed(
-                                          (index, e) => RadiologySelectWidget(
+                                      .where((element) => element['id'] == e.id)
+                                      .isNotEmpty,
+                                );
+                              }
+                              return RadiologySelectWidget(
+                                state: 2,
+                                selected: false,
+                                index: index,
+                                seen: true,
+                                e: e,
+                                image: e.file_url[0]['file'],
+                                description: e.received_note,
+                              );
+                            }),
+                            if(phase == 1)                                      ...Provider.of<PharmacyController>(
+                                              context)
+                                          .selected
+                                          .mapIndexed((index, e) =>
+                                              RadiologySelectWidget(
+                                                state: 1,
+                                                e: e,
+                                                selected: false,
+                                                index: index,
+                                                image: e['files'] != null
+                                                    ? e['files']
+                                                    : null,
+                                                description: e['received_note'],
+                                              )),
+
+                                              if(phase ==2) ...Provider.of<PharmacyController>(
+                                              context,
+                                              listen: false)
+                                          .selected
+                                          .mapIndexed((index, element) {
+                                        return RadiologySelectWidget(
+                                          state: 2,
+                                          selected:
+                                              Provider.of<PharmacyController>(
+                                                      context,
+                                                      listen: false)
+                                                  .accepted
+                                                  .where((e) =>
+                                                      element['id'] == e!['id'])
+                                                  .isNotEmpty,
+                                          index: index,
+                                          e: element,
+                                          image: element['files'] != null
+                                              ? element['files'][0]
+                                              : null,
+                                          description: element['received_note'],
+                                        );
+                                      })
+
+                        ]
+                      : recieved.is_seen!
+                          ? [
+                              ...recieved.readiology!
+                                  .mapIndexed((index, element) {
+                                return RadiologySelectWidget(
+                                  state: 2,
+                                  selected: false,
+                                  index: index,
+                                  seen: true,
+                                  e: element,
+                                  image: element.file_url[0]['file'],
+                                  description: element.received_note,
+                                );
+                              })
+                            ]
+                          : Provider.of<provider>(context).phase == 0
+                              ? [
+                                  ...recieved!.readiology!
+                                      .map((e) => RadiologySelectWidget(
+                                            state: 0,
+                                            e: e,
+                                            selected:
+                                                Provider.of<PharmacyController>(
+                                                        context,
+                                                        listen: false)
+                                                    .selected
+                                                    .where((element) =>
+                                                        element['id'] == e.id)
+                                                    .isNotEmpty,
+                                          ))
+                                ]
+                              : Provider.of<provider>(context).phase == 1
+                                  ? [
+                                      ...Provider.of<PharmacyController>(
+                                              context)
+                                          .selected
+                                          .mapIndexed((index, e) =>
+                                              RadiologySelectWidget(
                                                 state: 1,
                                                 e: e,
                                                 selected: false,
@@ -87,34 +170,41 @@ class _RadiologyPageState extends State<RadiologyPage> {
                                                     : null,
                                                 description: e['received_note'],
                                               ))
-                                ]
-                              : [
-                                  ...Provider.of<PharmacyController>(context,
-                                          listen: false)
-                                      .selected
-                                      .mapIndexed((index, element) {
-                                    return RadiologySelectWidget(
-                                      state: 2,
-                                      selected: Provider.of<PharmacyController>(
+                                    ]
+                                  : [
+                                      ...Provider.of<PharmacyController>(
                                               context,
                                               listen: false)
-                                          .accepted
-                                          .where(
-                                              (e) => element['id'] == e!['id'])
-                                          .isNotEmpty,
-                                      index: index,
-                                      e: element,
-                                      image: element['files'] != null
-                                          ? element['files'][0]
-                                          : null,
-                                      description: element['received_note'],
-                                    );
-                                  })
-                                ],
+                                          .selected
+                                          .mapIndexed((index, element) {
+                                        return RadiologySelectWidget(
+                                          state: 2,
+                                          selected:
+                                              Provider.of<PharmacyController>(
+                                                      context,
+                                                      listen: false)
+                                                  .accepted
+                                                  .where((e) =>
+                                                      element['id'] == e!['id'])
+                                                  .isNotEmpty,
+                                          index: index,
+                                          e: element,
+                                          image: element['files'] != null
+                                              ? element['files'][0]
+                                              : null,
+                                          description: element['received_note'],
+                                        );
+                                      })
+                                    ],
                 ))
               ],
             ),
-      bottomNavigationBar: recieved == null || recieved.is_seen!
+
+      ///
+      ///To Do Change this true with request.isSeen==null
+      ///
+
+      bottomNavigationBar:recieved== null? Container(height: 1,):  recieved!.is_seen!=null && (recieved == null || recieved.is_seen!)
           ? Container(
               height: 1,
             )
@@ -203,8 +293,15 @@ class _RadiologyPageState extends State<RadiologyPage> {
                               .changePhase(1);
                           break;
                         case 1:
-                          Provider.of<provider>(context, listen: false)
-                              .changePhase(2);
+                          if (Provider.of<PharmacyController>(context,
+                                  listen: false)
+                              .vlidate()) {
+                            Provider.of<provider>(context, listen: false)
+                                .changePhase(2);
+                          } else {
+                            Toast.show('msg', duration: toastDuration);
+                          }
+
                           break;
                         case 2:
                           setState(() {

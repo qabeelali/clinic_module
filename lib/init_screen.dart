@@ -1,12 +1,18 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_nps/layout/patient.dart';
+import 'package:flutter_nps/layout/requests.dart';
+
+import '/controller/pahrmacy_controller.dart';
+import '/controller/ptient_controller.dart';
+import '/controller/shcadule_controller.dart';
+import '/controller/user_controller.dart';
+import '/service/login.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:provider/provider.dart';
 
-import 'controller/pahrmacy_controller.dart';
-import 'controller/ptient_controller.dart';
-import 'controller/user_controller.dart';
+import 'layout/request.dart';
 
 class InitScreen extends StatefulWidget {
   const InitScreen({super.key});
@@ -16,11 +22,8 @@ class InitScreen extends StatefulWidget {
 }
 
 class _InitScreenState extends State<InitScreen> {
-  final channel2 = MethodChannel('com.example.myChannel');
   @override
   void initState() {
-    // TODO: implement initState
-    super.initState();
     const MethodChannel channel = MethodChannel('com.example.myChannel');
     channel.setMethodCallHandler((MethodCall call) {
       if (call.method == 'receiveParameter') {
@@ -29,11 +32,10 @@ class _InitScreenState extends State<InitScreen> {
       }
       return Future(() => null);
     });
-  }
 
-  Future<void> handleParameter(dynamic parameter) async {
-    // Handle the received parameter here
-    print('Received parameter from iOS: $parameter');
+    // TODO: implement initState
+    super.initState();
+    Provider.of<SchaduleController>(context, listen: false).init();
   }
 
   void pushToType(Map? e) {
@@ -50,10 +52,78 @@ class _InitScreenState extends State<InitScreen> {
         Provider.of<PharmacyController>(context, listen: false)
             .setToken(e['token']);
       }
-      Navigator.of(context)
-          .pushNamed(e['route'], arguments: {'name': e['name']});
+      if (e['method'] == 'home') {
+        Navigator.of(context)
+            .pushNamed(e['route'], arguments: {'name': e['name']});
+      } else if (e['method'] == 'notification') {
+        switch (e['route']) {
+          case 'sheet':
+            Provider.of<PatientController>(context, listen: false)
+                .getShowSheet(e['id']);
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => PatientScreen(),
+            ));
+
+            break;
+          case 'rx':
+            Provider.of<PharmacyController>(context, listen: false)
+                .getRecievedData(e['id']);
+            Navigator.of(context).pushNamed('/pharmacy_sheet');
+
+            break;
+
+          case 'lab':
+            Provider.of<PharmacyController>(context, listen: false)
+                .getRecievedData(e['id']);
+            Navigator.of(context).pushNamed('/lab');
+            break;
+          case 'radiology':
+            Provider.of<PharmacyController>(context, listen: false)
+                .getRecievedData(e['id']);
+            Navigator.of(context).pushNamed('/radiology');
+            break;
+          case 'ultrasound':
+            Provider.of<PharmacyController>(context, listen: false)
+                .getRecievedData(e['id']);
+            Navigator.of(context).pushNamed('/ultrasound');
+            break;
+          case 'othertest':
+            Provider.of<PharmacyController>(context, listen: false)
+                .getRecievedData(e['id']);
+            Navigator.of(context).pushNamed('/ultrasound');
+            break;
+          case 'clinic':
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => RequestScreen(id: e['id'])));
+                break;
+          default:
+        }
+      }
     }
+    print(e);
   }
+  //  {
+  //   'token':token, //string
+  //   'name':typeName,//string
+  //   'type':type,//int
+  //   ///
+  //   ///routes here have no changes same routs you have
+  //   ///
+  //   'route':route,//string, start with "/"
+  //   'method':"home"
+  // }
+
+  // {
+  //   'token':token, //string
+  //   'name':typeName,//string
+  //   'type':type,//string
+  //   ///
+  //   ///routes here are:
+  //   ///[rx, radiology, ultrasound, othertest, clinic]
+  //   ///
+  //   'route':route,//string, without "/"
+  //   'method': 'notification'
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +132,7 @@ class _InitScreenState extends State<InitScreen> {
         'name': 'doctor',
         'route': '/',
         'type': 2,
-        'token': '639|ykMizlvDLhsN0ri1sgHSX933THg70wbb0rxj21th',
+        'token': '964|9aBZEF96vlM8f4cpdDziN6ZHJrqeCEIdZcvo30Fm',
       },
       {
         'name': 'pharmacy',
@@ -91,13 +161,6 @@ class _InitScreenState extends State<InitScreen> {
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-            onPressed: () {
-              channel2.invokeMethod('popFlutterApp');
-            },
-            icon: Icon(Icons.arrow_back_ios_new_outlined)),
-      ),
       body: Center(
         child: Wrap(
           alignment: WrapAlignment.center,

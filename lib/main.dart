@@ -1,19 +1,22 @@
+import '../controller/provider.dart';
+import '../controller/ptient_controller.dart';
+import '../controller/shcadule_controller.dart';
+import '../controller/user_controller.dart';
+import '../init_screen.dart';
+import '../layout/Pharmacy_page.dart';
+import '../layout/lab_page.dart';
+import '../layout/main_page.dart';
+import '../layout/other_test.dart';
+import '../layout/patient.dart';
+import '../layout/pharmacy.dart';
+import '../layout/radiology_page.dart';
+import '../layout/request.dart';
+import '../layout/requests.dart';
+import '../layout/ultrasound.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import './controller/pahrmacy_controller.dart';
-import 'controller/provider.dart';
-import 'controller/ptient_controller.dart';
-import 'controller/user_controller.dart';
-import 'init_screen.dart';
-import 'layout/Pharmacy_page.dart';
-import 'layout/lab_page.dart';
-import 'layout/main_page.dart';
-import 'layout/other_test.dart';
-import 'layout/patient.dart';
-import 'layout/pharmacy.dart';
-import 'layout/radiology_page.dart';
-import 'layout/ultrasound.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +26,9 @@ void main() {
       providers: [
         ChangeNotifierProvider<userController>(
           create: (_) => userController(),
+        ),
+         ChangeNotifierProvider<SchaduleController>(
+          create: (_) => SchaduleController(),
         ),
         ChangeNotifierProvider<PharmacyController>(
             create: (_) => PharmacyController()),
@@ -53,7 +59,9 @@ class MyApp extends StatelessWidget {
         '/radiology': (context) => RadiologyPage(),
         '/lab': (context) => LabPage(),
         '/ultrasound': (context) => UltrasoundPage(),
-        '/other': (context) => OtherTestPage()
+        '/other': (context) => OtherTestPage(),
+        // '/request':(context) => RequestScreen(),
+        
       },
       onGenerateRoute: (settings) {
         switch (settings.name) {

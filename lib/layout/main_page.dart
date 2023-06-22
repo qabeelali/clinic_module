@@ -1,11 +1,13 @@
+import '../layout/add_patient.dart';
+import '../model/pharmacy_model.dart';
+import '../view/patient.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_nps/layout/add_patient.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:toast/toast.dart';
 
 import '../helper/my_appbar.dart';
-import '../view/patient.dart';
 import '../view/received.dart';
+import '../view/schadule.dart';
 import '../widget/tabbar_item.dart';
 
 class MainPage extends StatefulWidget {
@@ -38,22 +40,22 @@ class _MainPageState extends State<MainPage> {
         'index': 0,
         'color': Color(0xff0199EC),
       },
-      // {
-      //   'name': 'Schadule',
-      //   'widget': Schadule(),
-      //   'index': 1,
-      //   'color': Color(0xffF7227F)
-      // },
+      {
+        'name': 'Schadule',
+        'widget': Schadule(),
+        'index': 1,
+        'color': Color(0xff0199EC)
+      },
       {
         'name': 'Recieved',
         'widget': ReceivedScreen(),
-        'index': 1,
-        'color': Color(0xff0199EC)
+        'index': 2,
+        'color': Color(0xffF7227F)
       }
     ];
     return DefaultTabController(
       initialIndex: selectedTab,
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: PreferredSize(
             child: MyAppbar(
@@ -71,7 +73,12 @@ class _MainPageState extends State<MainPage> {
                           }));
                         },
                         icon: SvgPicture.asset('assets/images/add_patient.svg'))
-                    : Container(),
+                    : selectedTab == 1? IconButton(
+                        onPressed: () {
+                          Navigator.of(context)
+                              .pushNamed('/request');
+                        },
+                        icon: SvgPicture.asset('assets/images/go_to_request.svg')): Container(),
                 Container(
                   width: 20,
                 )

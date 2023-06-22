@@ -1,4 +1,4 @@
-import 'package:flutter_nps/model/sheet.dart';
+import '../model/sheet.dart';
 
 class PharmacyItem {
   PharmacyItem({
@@ -12,7 +12,7 @@ class PharmacyItem {
   final int type_id;
   final String name;
   final String date;
-  final bool is_seen;
+  final bool? is_seen;
 
   factory PharmacyItem.fromJson(Map<String, dynamic> json) {
     return PharmacyItem(
@@ -31,7 +31,7 @@ class Recieved {
       required this.user_info,
       this.rx,
       required this.id,
-      this.lab,
+      required this.lab,
       this.ultrasound,
       this.other,
       this.is_seen,
@@ -42,7 +42,7 @@ class Recieved {
   final String? date;
   final int id;
   final List<Radiology>? readiology;
-  final List<Lab>? lab;
+  final List<Lab> lab;
   final List<Ultrasound>? ultrasound;
   final List<Other>? other;
   final bool? is_seen;

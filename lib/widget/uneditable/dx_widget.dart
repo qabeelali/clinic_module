@@ -1,9 +1,8 @@
+import '../../view/image_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter_svg/svg.dart';
-
-import '../../view/image_screen.dart';
 
 class DxU extends StatelessWidget {
   final String data;
@@ -54,22 +53,20 @@ class DxU extends StatelessWidget {
             ),
           ),
         ),
-        image.length == 0
-            ? Container()
-            : Positioned(
-                bottom: 0,
-                left: 40,
-                child: GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).push(_createRoute());
-                    },
-                    child: Hero(
-                      tag: 'image1',
-                      child: CircleAvatar(
-                        child: SvgPicture.asset('assets/images/image.svg'),
-                        backgroundColor: Colors.white,
-                      ),
-                    )))
+     image.length==0? Container():   Positioned(
+            bottom: 0,
+            left: 40,
+            child: GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(_createRoute());
+                },
+                child: Hero(
+                  tag: 'image1',
+                  child: CircleAvatar(
+                    child: SvgPicture.asset('assets/images/image.svg'),
+                    backgroundColor: Colors.white,
+                  ),
+                )))
       ],
     );
   }
@@ -77,10 +74,8 @@ class DxU extends StatelessWidget {
   Route _createRoute() {
     return PageRouteBuilder(
       transitionDuration: Duration(milliseconds: 300),
-      pageBuilder: (context, animation, secondaryAnimation) => ImageScreen(
-        image: image,
-        tag: 'image1',
-      ),
+      pageBuilder: (context, animation, secondaryAnimation) =>
+           ImageScreen(image:image, tag: 'image1',),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return child;
       },

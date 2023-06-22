@@ -38,3 +38,22 @@ String searchToLoinkUrl(String? search) {
 String linkUserUrl = '${appUrl}/api/sheets/link-user';
 String checkSearchUrl = '${appUrl}/api/sheets/check-search';
 const sendSheet = '${appUrl}/api/sheets/send-sheet';
+String getDaysUrl (String date){
+  return '${appUrl}/api/main-ca?date=$date';
+}
+String getOrdersUrl(String date){
+  return '${appUrl}/api/day-ca?date=$date';
+}
+String getRequestsUrl(String type, String? date, dynamic state){
+  return "${appUrl}/api/orders/?state=${state??''}&date=${date??''}&type=$type";
+}
+String getRequestUrl(String id){
+  return '${appUrl}/api/orders/show?id=$id&type=1';
+}
+
+String getDatesUrl(id){
+  return '$appUrl/api/orders/availedBooking?id=$id';
+}
+const String getPricesUrl = '$appUrl/api/prices?type=1';
+const String acceptRequestUrl = '$appUrl/api/orders/accept';
+const String rejectRequestUrl = '$appUrl/api/orders/reject';

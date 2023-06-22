@@ -1,17 +1,17 @@
+import '../controller/pahrmacy_controller.dart';
+import '../helper/launch_screen.dart';
+import '../model/pharmacy_model.dart';
+import '../widget/pharmacy_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:provider/provider.dart';
 import 'package:toast/toast.dart';
 
-import '../controller/pahrmacy_controller.dart';
 import '../controller/ptient_controller.dart';
-import '../helper/launch_screen.dart';
 import '../helper/my_appbar.dart';
-import '../model/pharmacy_model.dart';
 import '../model/sheet.dart';
 import '../utils/props.dart';
-import '../widget/pharmacy_widget.dart';
 
 class PahrmacyLayout extends StatefulWidget {
   const PahrmacyLayout({super.key});
